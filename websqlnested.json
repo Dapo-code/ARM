@@ -1,0 +1,99 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {"SQLLogin": 
+        {
+            "type": "string",
+            "metadata": 
+            {
+                "description": "Administrator user name"
+            }
+        },
+        "SQLPassword": 
+        {
+            "type": "securestring",
+            "metadata": 
+            {
+                "description": "Administrator Password"
+            }
+        }
+        },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-09-01",
+            "name": "plan84",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+
+            "properties": {
+                "name":"plan84"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2022-09-01",
+            "name": "webapp84765",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "webapp84765",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms','plan84')]"
+            },
+            "dependsOn": ["[resourceId('Microsoft.Web/serverfarms','plan84')]"]
+
+        },
+// when deploying a nested template with a child you use the mode incremental within the property key.
+// Also, the type of deployment is "Microsoft.Resources/deployments"
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name":"childTemplate",
+            "properties": 
+            {
+                "mode": "Incremental",
+                "template": 
+                {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": 
+    [
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2023-05-01-preview",
+            "name": "server8484a",
+            "location": "[resourceGroup().location]", 
+            "properties": 
+            {
+                "administratorLogin": "[parameters('SQLLogin')]",
+                "administratorLoginPassword": "[parameters('SQLPassword')]"
+
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2023-05-01-preview",
+            "name": "[format('{0}/{1}','server8484a','appdb1')]",
+            "location": "[resourceGroup().location]",
+            "sku":
+            {
+                "name": "Basic",
+                "tier": "Basic"
+            },
+            "properties":{},
+            "dependsOn":
+            [
+                "[resourceId('Microsoft.Sql/servers', 'server8484a')]"
+            ]
+        }
+    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

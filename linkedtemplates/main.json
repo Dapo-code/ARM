@@ -1,0 +1,54 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-09-01",
+            "name": "plan84",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "properties": {
+                "name":"plan84"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2022-09-01",
+            "name": "webapp84765",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "webapp84765",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms','plan84')]"
+            },
+// The dependson key ensures that a certain resource (Microsoft.Web/serverfarms) is created before another(Microsoft.Web/sites) 
+            "dependsOn": ["[resourceId('Microsoft.Web/serverfarms','plan84')]"]
+
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "LinkedTemplate",
+// to link the templates we use a url link to link to the file in the storage account
+            "properties":{
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://udemystor1.blob.core.windows.net/templates/sqldatabase.json",
+                    "contentVersion": "1.0.0.0"
+                },
+// We use the parameters link to link the needed parameters stored in the storage account
+                "parametersLink":{
+                    "uri": "https://udemystor1.blob.core.windows.net/templates/sqldatabase-parameters.json",
+                    "contentVersion": "1.0.0.0"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

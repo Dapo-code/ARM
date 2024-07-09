@@ -1,0 +1,7 @@
+az resource delete -g template-rg -n "server8484b/appdb1" --resource-type "Microsoft.Sql/servers/databases"
+
+az resource delete -g template-rg -n "server8484b" --resource-type "Microsoft.Sql/servers"
+
+az resource delete -g template-rg -n webapp84765 --resource-type "Microsoft.Web/sites"
+
+az resource delete -g template-rg -n plan84 --resource-type "Microsoft.Web/serverfarms"

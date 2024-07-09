@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": 
+    {
+        "SQLLogin": 
+        {
+            "type": "string",
+            "metadata": 
+            {
+                "description": "Administrator user name"
+            }
+        },
+        "SQLPassword": 
+        {
+            "type": "securestring",
+            "metadata": 
+            {
+                "description": "Administrator Password"
+            }
+        }
+// Note the securestring function ensures that the password is not visible unlike using just strings
+    },
+    "functions": [],
+    "variables": {},
+    "resources": 
+    [
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2023-05-01-preview",
+            "name": "server8484c",
+            "location": "[resourceGroup().location]", 
+            "properties": 
+            {
+                "administratorLogin": "[parameters('SQLLogin')]",
+                "administratorLoginPassword": "[parameters('SQLPassword')]"
+
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2023-05-01-preview",
+            "name": "[format('{0}/{1}','server8484c','appdb2')]",
+            "location": "[resourceGroup().location]",
+            "sku":
+            {
+                "name": "Basic",
+                "tier": "Basic"
+            },
+            "properties":{},
+            "dependsOn":
+            [
+                "[resourceId('Microsoft.Sql/servers', 'server8484c')]"
+            ]
+        }
+    ],
+    "outputs": {}
+}
